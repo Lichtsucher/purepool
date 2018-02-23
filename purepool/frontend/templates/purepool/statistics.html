@@ -1,0 +1,139 @@
+{% extends 'purepool/base.html' %}
+
+{% block title %}Statistics{% endblock %}
+
+{% block content %}
+
+<main role="main" class="miner-details">
+  
+  <div class="container">
+    
+    <p class="float-right cache-notice">Cached (5 min)</p>
+    <h1>Pool statistics</h1>
+
+      
+    <div id="share_chart"></div>
+    <div id="block_chart"></div>
+            
+  </div>
+
+  <div class="container additional-content">
+    <div class="row">
+
+
+      <div class="col-sm">
+        <h3>Statistics</h3>
+
+        <p>Statistics are fun</p>
+
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">Name</th>
+              <th scope="col">Value</th>
+            </tr>
+          </thead>
+          <tbody>
+
+            <tr>
+              <td>Current blockchain height</td>
+              <td>{{ current_height }}</td>
+            </tr>
+
+            <tr>
+              <td>Blockchain blocks in {{ days }} days</td>
+              <td>{{ all_blocks }}</td>
+            </tr>
+
+            <tr>
+              <td>Pool blocks in {{ days }} days</td>
+              <td>{{ pool_blocks }}</td>
+            </tr>
+
+            <tr>
+              <td>Pool blocks in {{ days }} days (%)</td>
+              <td>{{ pool_blocks_percent }} %</td>
+            </tr>
+
+            <tr>
+              <td>BBP mined in {{ days }} days (with immature)</td>
+              <td>{{ bbp_mined }}</td>
+            </tr>
+
+          </tbody>
+        </table>
+
+      </div>
+
+      <div class="col-sm">
+        <h3>Top 100 miners</h3>
+
+        <p>in the last 24h</p>
+
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">Address</th>
+              <th scope="col">Shares (24h)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for miner in top_miners %}
+            <tr>
+              <td>{{ miner.miner__address }}</td>
+              <td>{{ miner.total }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+      </div>
+    </div>
+  </div>   
+  
+  
+</main>
+
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+<script>
+google.charts.load('current', {packages: ['corechart', 'line']});
+google.charts.setOnLoadCallback(drawBasic);
+
+function drawBasic() {
+
+      var data = new google.visualization.DataTable();
+      data.addColumn('string', 'Time');
+      data.addColumn('number', 'Shares');
+      data.addColumn('number', 'Blocks found');
+
+      data.addRows([
+        
+        {% for day in statistics %}
+           ['{{ day.0|date:'d b'}}', {{ day.1 }}, {{ day.2 }} ],
+        {% endfor %}
+
+      ]);
+
+      var options = {
+        series: {
+          0: {targetAxisIndex: 0},
+          1: {targetAxisIndex: 1}
+        },
+        hAxis: {
+          title: ''
+        },
+        vAxis: {
+          // Adds titles to each axis.
+          0: {title: ')'},
+          1: {title: ''}
+        },
+      };
+
+      var chart = new google.visualization.LineChart(document.getElementById('share_chart'));
+
+      chart.draw(data, options);
+    }  
+</script>
+
+{% endblock %}

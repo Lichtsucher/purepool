@@ -1,0 +1,114 @@
+{% extends 'purepool/base.html' %}
+
+{% block title %}Miner statistics{% endblock %}
+
+{% block content %}
+
+<main role="main" class="miner-details">
+  
+  <div class="container">
+    
+    <h1>Miner statistics</h1>
+    <h2 class="miner-id">{{  miner.address }}</h2>
+    
+    
+    <div id="share_chart"></div>
+      
+  </div>
+  
+  <div class="container additional-content">
+    <div class="row">
+      
+      <div class="col-sm">
+        <h3>Worker</h3>
+      
+        <p>Workers with at least one share in the last 24h</p>
+        
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">Worker</th>
+              <th scope="col">Shares (24h)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for worker in workers %}
+            <tr>
+              <th scope="row">{{ worker.0.name }}</th>
+              <td>{{ worker.1 }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>        
+        
+      </div>      
+      
+      <div class="col-sm">
+        <h3>Transactions</h3>
+        
+        <p>Current bbp: {{ miner.balance }}</p>
+        
+        <p>Last 100 transactions:</p>
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">Date</th>
+              <th scope="col">Amount</th>
+              <th scope="col">Note</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for tx in transactions %}
+            <tr>
+              <th scope="row">{{ tx.inserted_at }}</th>
+              <td>{{ tx.amount }}</td>
+              <td>{{ tx.note }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+            
+    </div>
+      
+  </div>
+  
+  
+</main>
+
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+<script>
+google.charts.load('current', {packages: ['corechart', 'line']});
+google.charts.setOnLoadCallback(drawBasic);
+
+function drawBasic() {
+
+      var data = new google.visualization.DataTable();
+      data.addColumn('string', 'Time');
+      data.addColumn('number', 'Shares');
+
+      data.addRows([
+        
+        {% for day in share_statistics %}
+           ['{{ day.0|date:'d b'}}', {{ day.1}} ],
+        {% endfor %}
+
+      ]);
+
+      var options = {
+        hAxis: {
+          title: ''
+        },
+        vAxis: {
+          title: ''
+        }
+      };
+
+      var chart = new google.visualization.LineChart(document.getElementById('share_chart'));
+
+      chart.draw(data, options);
+    }  
+</script>
+
+{% endblock %}

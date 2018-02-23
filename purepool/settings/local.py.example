@@ -1,0 +1,101 @@
+import os
+
+POOL_NAME = "My Cool Pool"
+POOL_WEBSITE_URL = "https://www.mypool.org"
+POOL_INTERFACE_URL = "https://pool.mypool.org"
+
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = True
+
+TIME_ZONE = 'CET'
+
+# Database
+# https://docs.djangoproject.com/en/2.0/ref/settings/#databases
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'purepool',
+        'USER': 'purepool',
+        'PASSWORD': 'purepool',
+        'HOST': '127.0.0.1'
+    }
+}
+
+ALLOWED_HOSTS = [
+    '192.168.0.9', # your ip
+    'examplepool.exampe.text', # and or your domane(s)
+]
+
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = 'SomeRandomString-CHANGE-IT!'
+
+# The cache is very important for the system, ensure that it is correct!
+# If you use different servers for Frontend/Interface and Tasks, do NOT share the same
+# cache (for security reasons)!
+# Best are different memcache installations
+# Look at https://docs.djangoproject.com/en/2.0/topics/cache/#setting-up-the-cache
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+    }
+}
+
+
+# rpc connection settings for the biblepay client
+# one connection per network!
+BIBLEPAY_RPC = {
+    'test': {
+        'IP': '127.0.0.1',
+        'PORT': '40009',
+        'USER': 'YOUR USER',
+        'PASSWORD': 'YOUR PASSWORD',
+    }
+}
+
+# The networks of biblepay that this server supports
+# it is also possible to only use "main"  -> ("main",)
+BIBLEPAY_NETWORKS = ('main', 'test')
+
+# the default network used for the frontend
+BIBLEPAY_DEFAULT_NETWORK = 'main'
+
+# The time between a block is found and it is matured
+# Can be configured as it is different between main and test
+POOL_BLOCK_MATURE_HOURS = {
+    'main': 24,
+    'test': 24
+}
+
+# If the pool has fee, set it here
+POOL_FEE_PERCENT = 0
+
+# The pool biblepay address. Used by the miners to set the right target address for thier blocks
+POOL_ADDRESS = {
+    'main': 'INSERT_YOUR_WALLET_TARGET_ADDRESS_OF_THE_POOL_BIBLEPAY_MAIN',
+    'test': 'INSERT_YOUR_WALLET_TARGET_ADDRESS_OF_THE_POOL_BIBLEPAY_TEST',
+}
+
+# If this balance is reached, an autosend of the bbp is done
+POOL_MINIMUM_AUTOSEND = {
+    'main': 10,
+    'test': 10000,
+}
+
+# all solutions and works older then x-days will be removed from the system
+POOL_CLEANUP_MAXDAYS = 14
+
+# enabled the pool interface (used by the miners to connect) for this installation
+# can be disabled to run only the interface on this maschine
+ENABLE_POOL_INTERFACE = True
+
+# enabled the frontend for this installation
+# can be disabled to run only the frontend on this maschine
+ENABLE_POOL_FRONTEND = True
+
+# allow this installation to run the tasks
+# For security reasons, this should run on another system, that has more rights on the
+# database then the frontend and interface
+ENABLE_POOL_TASKS = True
+

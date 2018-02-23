@@ -1,0 +1,106 @@
+{% load purepool_core %}
+
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  
+  <title>{% block title %}{% endblock %} - {{ POOL_NAME }} / Biblepay Pool</title>
+  
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  
+  <style>
+    .title-text {
+      padding: 0 0.5em 0 0.2em;
+    }
+    
+    footer {
+      margin-top: 20em;
+      border-top: 1px dashed lightgray;
+      padding-top: 2em;
+      font-size: 70%;
+    }
+    
+    .index-address-input {
+      max-width: 500px;
+    }
+    
+    main.miner-details {
+      padding-top: 2em;
+    }
+    
+    h2.miner-id {
+      color: gray;
+    }
+    
+    .icon-404 {
+      width: 50%;
+      padding: 2em;
+    }
+    
+    ul li, ol li {
+      margin-bottom: 1em;
+    }
+
+    .cache-notice {
+      color: gray;
+    }
+
+    .additional-content {
+      margin-top: 3em;
+    }
+    
+    .additional-content h3 {
+      font-weight: normal;
+    }
+
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="navbar navbar-dark bg-dark box-shadow">
+      <div class="container d-flex justify-content-between">
+        <a href="/" class="navbar-brand d-flex align-items-center">
+          
+          <img src="data:image/svg+xml;utf8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pgo8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMTguMS4xLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogNi4wMCBCdWlsZCAwKSAgLS0+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iQ2FwYV8xIiB4PSIwcHgiIHk9IjBweCIgdmlld0JveD0iMCAwIDkyLjAwMSA5Mi4wMDEiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDkyLjAwMSA5Mi4wMDE7IiB4bWw6c3BhY2U9InByZXNlcnZlIiB3aWR0aD0iMjRweCIgaGVpZ2h0PSIyNHB4Ij4KPGc+Cgk8cGF0aCBkPSJNMjIuMzY2LDMwLjU2OWMxLjAwNCwwLDEuOTc0LDAuMTUyLDIuODg3LDAuNDM0YzMuNDQ4LTMuODY0LDcuMjcxLTcuMzc5LDExLjQxMS0xMC41ICAgYy0wLjE3My0wLjczMS0wLjI3NS0xLjQ4OS0wLjI3NS0yLjI3NGMwLTEuMDg0LDAuMTg0LTIuMTI1LDAuNTEtMy4xYy00LjYzNy0zLjMyOC05LjY4Mi02LjEyLTE1LjA0Ny04LjI3OSAgIGMtNS4wMzEsMy4xMDktOS40MTgsNy4xNjItMTIuOTE0LDExLjkxMmMyLjU5Niw0LjU5Niw1LjY4Miw4Ljg4Myw5LjE4OSwxMi43ODRDMTkuNDExLDMwLjkyNiwyMC44NDcsMzAuNTY5LDIyLjM2NiwzMC41Njl6ICAgIE0xMi41OCw0MC4zNTVjMC0xLjM3NCwwLjI4Ny0yLjY4MiwwLjc5OC0zLjg2OGMtMy4xNDItMy40NDgtNS45ODYtNy4xNy04LjQ3OS0xMS4xMzVDMS43NzEsMzEuNTYyLDAsMzguNTcyLDAsNDUuOTk5ICAgYzAsOC42MDIsMi4zNjYsMTYuNjQ3LDYuNDc2LDIzLjUzM2MxLjQ2OC04LjI3Nyw0LjI1NC0xNi4wOTYsOC4xMDMtMjMuMjY4QzEzLjMyOCw0NC42MjIsMTIuNTgsNDIuNTc5LDEyLjU4LDQwLjM1NXogICAgTTQ2LjE3Niw4LjQ0MWMyLjU4NSwwLDQuOTI5LDEuMDA5LDYuNjc4LDIuNjQ2QzU3Ljk2LDguODksNjMuMzM5LDcuMjA2LDY4LjkzMiw2LjEyOUM2Mi4xOCwyLjIzOCw1NC4zNTQsMCw0NiwwICAgQzQwLjMwNiwwLDM0Ljg1NCwxLjA0MywyOS44MiwyLjkzNmMzLjk5NiwxLjk3Miw3LjgwMyw0LjI3NiwxMS4zODUsNi44NzNDNDIuNjYzLDguOTQ1LDQ0LjM2LDguNDQxLDQ2LjE3Niw4LjQ0MXogTTYwLjgxMiw1NC41MzggICBjMC42MDktMS4yNjgsMS40NzQtMi4zODksMi41NDMtMy4yODFjLTIuODg4LTguODkxLTcuNDY1LTE3LjAyMS0xMy4zNTktMjQuMDE2Yy0xLjE3MywwLjQ5OC0yLjQ2NCwwLjc3NC0zLjgyLDAuNzc0ICAgYy0yLjEyMywwLTQuMDgyLTAuNjg0LTUuNjg2LTEuODMyYy0zLjU0NywyLjY5Ni02LjgzLDUuNzE5LTkuODE1LDkuMDE4YzAuOTMyLDEuNDk3LDEuNDc5LDMuMjYxLDEuNDc5LDUuMTU0ICAgYzAsMS4wMjMtMC4xNTgsMi4wMDctMC40NDgsMi45MzNDNDAuMjkxLDQ5LjAyNCw1MC4xNjksNTIuOTU2LDYwLjgxMiw1NC41Mzh6IE03My41MDcsNjcuNzQ5YzAuMTM1LDEuODUzLDAuMjA2LDMuNzIzLDAuMjA2LDUuNjA5ICAgYzAsMy4zMjEtMC4yMTIsNi41OTItMC42MTIsOS44MDVDODAuOSw3Ny40NjUsODYuODQsNjkuMzc2LDg5LjgzNSw1OS45N2MtMy41NDcsMC44NTgtNy4xODgsMS40NzEtMTAuOTAyLDEuODI4ICAgQzc4LjA1OSw2NC40NzYsNzYuMDY2LDY2LjY0Myw3My41MDcsNjcuNzQ5eiBNNTguNTE5LDYxLjExNmMtMTEuMzU0LTEuODgxLTIxLjg4My02LjIxMy0zMS4wNDYtMTIuNDIxICAgYy0xLjQ4NywwLjkxMi0zLjIzMiwxLjQ0OS01LjEwNSwxLjQ0OWMtMC42ODgsMC0xLjM1OC0wLjA3My0yLjAwNy0wLjIwOGMtNC4zODcsOC4zMTctNy4xOSwxNy41OTMtNy45OTYsMjcuNDI4ICAgYzQuMzgsNC42OTYsOS43MjQsOC40NzksMTUuNzI3LDExLjAxOUMzNS41NDMsNzYuOTIxLDQ1Ljk2NCw2Ny40NCw1OC41MTksNjEuMTE2eiBNNzYuODgsMTEuOTA2ICAgYy03LjM3MSwwLjcxMS0xNC40MTIsMi41NjEtMjAuOTY3LDUuMzQyYzAuMDM1LDAuMzIzLDAuMDUxLDAuNjQ5LDAuMDUxLDAuOThjMCwxLjU0NS0wLjM2OCwzLjAwMS0xLjAwNSw0LjMwMSAgIGM2LjU0OCw3LjY4OCwxMS42MzUsMTYuNjQ4LDE0Ljg0NiwyNi40NTZjMy45NzksMC4wNzEsNy4zODIsMi41MDksOC44NDUsNS45NzFjNC40MjgtMC40NDksOC43NC0xLjI5NiwxMi44OTQtMi41MTggICBjMC4yOTQtMi4xMDQsMC40NTctNC4yNTEsMC40NTctNi40MzlDOTIuMDAxLDMyLjQ3OSw4Ni4xNjcsMjAuMzIyLDc2Ljg4LDExLjkwNnogTTYzLjQ0Myw2Ni4zNDUgICBjLTExLjcyLDUuNDktMjEuNTE5LDEzLjk0NS0yOC42MTYsMjQuMjgyYzMuNTc3LDAuODkzLDcuMzE4LDEuMzc0LDExLjE3MywxLjM3NGM2LjkzOSwwLDEzLjUxNC0xLjU0NiwxOS40MTMtNC4yOTcgICBjMC45NDgtNC42MzcsMS40NS05LjQzMywxLjQ1LTE0LjM0NmMwLTEuNzc1LTAuMDgtMy41MzItMC4yMTMtNS4yNzNDNjUuNDY3LDY3LjcwNiw2NC4zODMsNjcuMTEyLDYzLjQ0Myw2Ni4zNDV6IiBmaWxsPSIjRkZGRkZGIi8+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPC9zdmc+Cg==" />           
+          <strong class="title-text">{{ POOL_NAME }}</strong> <small>Biblepay Pool</small>
+        </a>
+        
+        <!-- we change the network with the index page that redirects to the requested network -->
+        <form id="base_network_selector_form" action="/" method="GET">
+          <select name="network" id="base_network_selector" class="custom-select">
+            {% network_list as network_list_entries %}
+            {% for base_network in network_list_entries %}
+            <option value="{{ base_network }}" {% if network == base_network %}selected{% endif %}>Network: {{ base_network }}</option>
+            {% endfor %}
+          </select>
+        </form>
+                
+      </div>      
+    </div>
+  </header>
+
+  {% block content %}{% endblock %}
+
+  <footer class="text-muted">
+    <div class="container">      
+      <div>Header icon made by <a href="https://www.flaticon.com/authors/daniel-bruce" title="Daniel Bruce">Daniel Bruce</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>
+      <div>Doubt icon made by <a href="https://www.flaticon.com/authors/twitter" title="Twitter">Twitter</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>
+    </div>
+  </footer>
+
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+ 
+  <script>
+    $('#base_network_selector').change(function() {
+      $('#base_network_selector_form').submit()
+    });
+  </script>
+
+</body>
+</html>

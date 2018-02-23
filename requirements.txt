@@ -1,0 +1,7 @@
+django
+celery
+mysqlclient
+python-bitcoinrpc
+python-bitcoinlib
+python-memcached
+django-cache-memoize

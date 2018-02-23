@@ -1,0 +1,25 @@
+# A default celeryd config
+# Usefull if you use systemd with celery
+# More details: http://docs.celeryproject.org/en/latest/userguide/daemonizing.html
+
+# How many nodes are started
+CELERYD_NODES="8"
+
+# Absolute or relative path to the 'celery' command:
+CELERY_BIN="/srv/purepool_env/bin/celery"
+
+# App instance to use
+CELERY_APP="purepool"
+
+# How to call manage.py
+CELERYD_MULTI="multi"
+
+# we only allow one task per node, kill them after 50 tasks and assign only some queues to every node
+CELERYD_OPTS="--time-limit=3600 --concurrency=1 --max-tasks-per-child=50 -Q:1 send_autopayments -Q:2 find_new_blocks -Q:3-4 important -Q:5-8 standard,celery"
+
+# - %n will be replaced with the first part of the nodename.
+# - %I will be replaced with the current child process index
+#   and is important when using the prefork pool to avoid race conditions.
+CELERYD_PID_FILE="/var/run/celery/%n.pid"
+CELERYD_LOG_FILE="/var/log/celery/%n%I.log"
+CELERYD_LOG_LEVEL="INFO"

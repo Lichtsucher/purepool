@@ -1,0 +1,21 @@
+# this is an example cron file
+
+# we try to find new blocks every minute
+* * * * * celery /srv/purepool_env/bin/python3 /srv/purepool/manage.py find_new_blocks
+
+# the block process task is also run one every minute
+* * * * * celery /srv/purepool_env/bin/python3 /srv/purepool/manage.py process_next_block
+
+# the shareout task might run longer, so we start if only every 3 minutes. That should be good enough
+*/3 * * * * celery /srv/purepool_env/bin/python3 /srv/purepool/manage.py shareout_next_block
+
+# payments are send out in the late evening
+# we run it multiple times, as every run will only cover
+# some of the transactions, to not break the server...
+*/3 19,20,21,22 * * * celery /srv/purepool_env/bin/python3 /srv/purepool/manage.py send_autopayments
+
+# cleanup is started one a day 
+1 5 * * * celery /srv/purepool_env/bin/python3 /srv/purepool/manage.py cleanup_solutions
+
+# resets the statistics cache. Required, as per default it is multiple hours valid
+*/5 * * * * celery /srv/purepool_env/bin/python3 /srv/purepool/manage.py reset_statistics_cache

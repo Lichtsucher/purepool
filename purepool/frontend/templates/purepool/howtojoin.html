@@ -1,0 +1,98 @@
+{% extends 'purepool/base.html' %}
+
+{% block title %}How-To Join{% endblock %}
+
+{% block content %}
+
+<main role="main" class="miner-details">
+  
+  <div class="container">
+    
+    <h1>How to join the Pool</h1>
+    
+    <p>Just follow these short four steps and you will be mining with the pool in minutes</p>
+    
+    <h2>Setup</h2>
+    
+    <ol>
+        <li>Download the current Biblepay Client<br>
+            <small>Links: <a href="https://www.biblepay.org/" target="_blank">Windows/MacOS</a>,
+                          <a href="http://wiki.biblepay.org/Ubuntu_Packages" target="_blank">Ubuntu</a>,
+                          <a href="https://github.com/biblepay/biblepay" target="_blank">Linux/Other</a></small>
+        </li>
+        <li>Get the biblepay address wallet address<br>
+            <div><small>GUI: Start the client, click on "Receive", then "Request payment". Copy the Address from the popup</small></div>
+            <div><small>commandline: biblepay-cli getaccountaddress ""  (or add a number between "" for a new, additional address)</small></div>
+            </li>
+        <li>Edit your biblepay.conf
+          <small>
+            On Windows: Open the file explorer and open the address "%appdata%" (press enter). Then go to the directory "BiblePayCore" and edit the file biblepay.conf<br>
+            In Linux: Go to the directory ".biblepaycore" in your home directory (~//.biblepaycore/) and edit the file biblepay.conf<br>
+            You file should look like this:<br>
+            <samp><pre>
+                addnode=node.biblepay.org  
+                gen=1  
+                genproclimit=1
+                
+                pool={{ POOL_INTERFACE_URL }}
+                workerid=[your-biblepay-address-address]
+                </pre>
+            </samp>
+            
+            Example:
+            <pre>
+            <samp>
+                addnode=node.biblepay.org  
+                gen=1  
+                genproclimit=1
+                
+                pool={{ POOL_INTERFACE_URL }}
+                workerid=yQwwRT4NtwBw442eyz37NYTYzyfwxiHLk1
+            </samp>
+            </pre>
+            
+            <p>You can change the value genproclimit=1 to a different number, depending on your CPU. Higher numbers are for faster cpus.</p>
+            <p>Restart your Biblepay Client and start mining.</p>
+          </small>
+        </li>
+        <li>Start mining!</li>
+    </ol>
+    
+    <p>You don't even need an account on the pool, everything is done via your biblepay wallet address.</p>
+    
+    <h2>FAQ</h2>
+    
+    <ul>
+        <li>
+            <b>Question: Where is the login/register page for this pool</b><br>
+            Answer: There is none. This pools works without accounts, you only need a biblepay address.
+        </li>
+        <li>
+            <b>Question: How can I see, if my client is mining for the pool?</b><br>
+            Answer: On Windows/MacOS (GUI clients), go to "Tools" >> "Debug console" and type: "getmininginfo"<br>
+            On the commandline, type: "biblepay-cli getminginginfo".
+            Both commands should return a list, check "biblepay-generate" and "poolmining" for the value "true"
+        </li>
+        <li>
+            <b>Question: How many Biblepay coins will I get?</b><br>
+            Answer: Your part of every found block depends on how many valid shares your client had submitted.
+                    Go to the frontpage and enter your Wallet Address in the input field to see your statistics.<br>
+                    Important: These statistics are caches, so it might take some time until you see your data.
+        </li>
+        <li>
+            <b>Question: Will I get the Biblepay coins immediately when a block is found?</b><br>
+            Answer: No, first the block must be accepted by the network, we will wait 24 hours for that.
+            We will send the biblepay coins once a day, but only if the miner has reached the minimum payout limit.<br/>
+            The limits are:<br>
+            {% for net, limit in transfer_limits.items %}
+              - {{ net }}: {{ limit }} bbp<br>
+            {% endfor %}
+        </li>        
+    </ul>
+    
+        
+  </div>
+  
+</main>
+
+{% endblock %}

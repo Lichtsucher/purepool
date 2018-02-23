@@ -1,0 +1,38 @@
+{% extends 'purepool/base.html' %}
+
+{% block title %}Index{% endblock %}
+
+{% block content %}
+
+<main role="main">
+  <section class="jumbotron text-center">
+    <div class="container">
+      <h1 class="jumbotron-heading">Welcome to {{ POOL_NAME }}</h1>
+      <p class="lead text-muted">The easy to use Biblepay Pool for everybody</p>
+      <p>
+        <a href="{% url 'howtojoin' network %}" class="btn btn-primary my-2">How to join the Pool</a>
+        <a href="{% url 'statistics' network %}" class="btn btn-secondary my-2">Statistics</a>
+      </p>
+    </div>
+  </section>
+
+  <div class="container text-center index-address-input">
+    <h2>Already a miner?</h2>
+    <h3 class="lead text-muted">Find your statistics here:</h3>
+    
+    <form action="?" method="POST">
+      {% csrf_token %}
+      
+      <div class="input-group mb-3">
+        <input type="text" class="form-control" name="{{ form.address.html_name }}" placeholder="Biblepay Address" aria-label="Biblepay Address" aria-describedby="basic-addon2">
+        <div class="input-group-append">
+          <button class="btn btn-outline-secondary" type="submit">Show</button>
+        </div>
+      </div>
+    </form>
+    
+  </div>
+  
+</main>
+
+{% endblock %}
