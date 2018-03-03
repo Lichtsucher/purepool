@@ -12,7 +12,7 @@
 # payments are send out in the late evening
 # we run it multiple times, as every run will only cover
 # some of the transactions, to not break the server...
-*/3 19,20,21,22 * * * celery /srv/purepool_env/bin/python3 /srv/purepool/manage.py send_autopayments
+*/2 19,20,21,22,23 * * * celery /srv/purepool_env/bin/python3 /srv/purepool/manage.py send_autopayments
 
 # cleanup is started one a day 
 1 5 * * * celery /srv/purepool_env/bin/python3 /srv/purepool/manage.py cleanup_solutions

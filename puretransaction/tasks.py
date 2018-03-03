@@ -83,7 +83,7 @@ def send_autopayments(network):
 
                 # added to prevent a problem with to fast and many transactions
                 # in a short time
-                time.sleep(1)
+                time.sleep(5)
             
             # we update the miner with the new balance
             # even if no bbp was send (because of wrong values in the db). We
