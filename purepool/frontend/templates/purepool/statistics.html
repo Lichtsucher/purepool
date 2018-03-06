@@ -80,7 +80,7 @@
           <tbody>
             {% for miner in top_miners %}
             <tr>
-              <td>{{ miner.miner__address }}</td>
+              <td><a href="{% url "miner" network=network address=miner.miner__address %}">{{ miner.miner__address }}</a></td>
               <td>{{ miner.total }}</td>
             </tr>
             {% endfor %}
@@ -126,7 +126,10 @@ function drawBasic() {
         vAxis: {
           // Adds titles to each axis.
           0: {title: ')'},
-          1: {title: ''}
+          1: {title: ''},
+          viewWindow: {
+            min:0
+          }
         },
       };
 
