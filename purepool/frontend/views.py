@@ -5,7 +5,7 @@ from django.views.decorators.cache import cache_page
 from django.shortcuts import render
 from django.urls import reverse
 from django.utils import timezone
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from purepool.frontend.forms import MinerForm
 from purepool.frontend.statistics import get_solution_statistics, get_block_statistics, get_top_miners, get_basic_statistics, get_miner_solution_statistics
 from purepool.models.miner.models import Miner
@@ -63,19 +63,38 @@ def howtojoin(request, network):
         'transfer_limits': settings.POOL_MINIMUM_AUTOSEND
     })
 
+
+def statistics_json(request, network):
+    """ returns the basic statistics as json string """
+
+    days = 1
+    current_height, all_blocks, pool_blocks, pool_blocks_percent, bbp_mined = get_basic_statistics(network, days)
+
+    return JsonResponse({
+          'network': network,
+          'days': days,
+          'current_height': current_height,
+          'all_blocks': all_blocks,
+          'pool_blocks': pool_blocks,
+          'pool_blocks_percent': pool_blocks_percent,
+          'bbp_mined': bbp_mined,
+        })
+
 def statistics(request, network):
     """ some nice statistics for the whole pool """
 
     # some basic statistics
-    days = 7
+    days = 1
 
     current_height, all_blocks, pool_blocks, pool_blocks_percent, bbp_mined = get_basic_statistics(network, days)
+
+    graph_days = 7
 
     top_miners = get_top_miners(network)
 
     # the solution and block statistics
-    share_statistics = get_solution_statistics(network, days=days)
-    block_statistics = list(get_block_statistics(network, days=days))
+    share_statistics = get_solution_statistics(network, days=graph_days)
+    block_statistics = list(get_block_statistics(network, days=graph_days))
 
     statistics = []
     # now we join the statistics
