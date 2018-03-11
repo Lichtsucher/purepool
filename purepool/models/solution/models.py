@@ -66,6 +66,11 @@ class BaseSolution(models.Model):
     # the date/time when the solution as send to the pool
     inserted_at = models.DateTimeField(auto_now_add=True, db_index=True)
 
+    # sometimes we want to mark already accepted solutions as ignore, this can happen if we
+    # found faked solutions, that where only discovered later, but we don't want to alert the
+    # faker early
+    ignore = models.BooleanField(default=False)
+
     class Meta:
         abstract = True    
     

@@ -210,7 +210,7 @@ def shareout_next_block(network, block_height=None, dry_run=False):
     # now we count the users solutions for the block
     # Important: Do not remove the ".order_by()", as it is required, or the result
     # will be wrong (seems to be a django problem)
-    qs = Solution.objects.filter(network=network, block=block)
+    qs = Solution.objects.filter(network=network, block=block, ignore=False)
 
     if not dry_run: # in reall live, we only want entries that where not already processed
         qs = qs.filter(processed=False)

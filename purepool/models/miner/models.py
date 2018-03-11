@@ -25,7 +25,7 @@ class WorkerNotFound(Exception):
 def get_miner_id_by_address(network, address):
     """ returns the miner database id by the address. Uses the cache to speed up everything """
     
-    key = 'miner_id__%s__%s' % (network, address)
+    key = 'miner_id__%s__%s' % (network.replace(' ', '__'), address.replace(' ', '__'))
     miner_id = cache.get(key, None)
     
     if miner_id == 'DISABLED':
@@ -52,7 +52,7 @@ def get_miner_id_by_address(network, address):
 def get_worker_id_by_name(network, address, worker_name):
     """ returns the workers database id by itsname (and its miner address). Uses the cache to speed up everything """
     
-    key = 'miner_id__%s__%s__%s' % (network, address, worker_name)
+    key = 'miner_id__%s__%s__%s' % (network, address.replace(' ', '__'), worker_name.replace(' ', '__'))
     worker_id = cache.get(key, None)
     
     if worker_id is None:
