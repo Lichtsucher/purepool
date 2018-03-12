@@ -45,9 +45,9 @@ def GetHashDifficulty(shares_solved):
     str_prefix = "00000000000" + str(int(round(prefix, 0)))
 
     str_prefix = str_prefix[len(str_prefix) - sub_len:sub_len]
-    str_pre_prefix = "00000"
+    str_pre_prefix = "00"
 
-    hash_target = str_pre_prefix + str_prefix + "111100000000000000000000000000000000000000000000000000000000";
+    hash_target = str_pre_prefix + str_prefix + "111100000000000000000000000000000000000000000000000000000000000";
     hash_target = hash_target[:64]
 
     return hash_target
