@@ -100,11 +100,21 @@ def statistics(request, network):
     # now we join the statistics
     for i, share_stat in enumerate(list(share_statistics)):
         statistics.append([share_stat[0], share_stat[1], block_statistics[i][1]])
-    
+
+    # and finally the forecast for the blocks
+    blocks_two_days = statistics[-2][2] + statistics[-1][2]
+    blocks_per_hour = blocks_two_days / (24 + timezone.now().hour)
+    forecast_blocks = int(round(blocks_per_hour * 24))
+
+    last_blocks = Block.objects.filter(network=network, pool_block=True).values('height', 'inserted_at').order_by('-height')[0:50]
+
     return render(request, 'purepool/statistics.html', {
           'network': network,
           'statistics': statistics,
           'top_miners': top_miners,
+          'last_blocks': last_blocks,
+
+          'forecast_blocks': forecast_blocks,
 
           'days': days,
           'current_height': current_height,

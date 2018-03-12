@@ -8,17 +8,18 @@ class Command(TaskCommand):
     def handle(self, *args, **options):
         super(Command, self).handle(*args, **options)
 
-        days = 7
+        days = 1
+        graph_days = 7
 
         # recalculate the caches
         for network in settings.BIBLEPAY_NETWORKS:
             get_basic_statistics(network, days, _refresh=True)
 
         for network in settings.BIBLEPAY_NETWORKS:
-            get_solution_statistics(network, days=days, _refresh=True)
+            get_solution_statistics(network, days=graph_days, _refresh=True)
 
         for network in settings.BIBLEPAY_NETWORKS:
-            get_block_statistics(network, days=days, _refresh=True)
+            get_block_statistics(network, days=graph_days, _refresh=True)
         
         for network in settings.BIBLEPAY_NETWORKS:
             get_top_miners(network, _refresh=True)

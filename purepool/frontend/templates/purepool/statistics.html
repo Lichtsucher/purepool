@@ -63,6 +63,26 @@
           </tbody>
         </table>
 
+        <br><br>
+
+        <h3>Last Blocks found</h3>
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">Height</th>
+              <th scope="col">Found at</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for block in last_blocks %}
+            <tr>
+              <td>{{ block.height }}</td>
+              <td>{{ block.inserted_at }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
       </div>
 
       <div class="col-sm">
@@ -106,19 +126,19 @@ function drawBasic() {
       data.addColumn('string', 'Time');
       data.addColumn('number', 'Shares');
       data.addColumn('number', 'Blocks found');
+      data.addColumn('number', 'Forecast');
 
       data.addRows([
-        
         {% for day in statistics %}
-           ['{{ day.0|date:'d b'}}', {{ day.1 }}, {{ day.2 }} ],
+           ['{{ day.0|date:'d b'}}', {{ day.1 }}, {{ day.2 }}, {% if forloop.counter == 7 %}{{ forecast_blocks }}{% elif forloop.counter == 6 %}{{ day.2}}{% else %}null{% endif %}],
         {% endfor %}
-
       ]);
 
       var options = {
         series: {
           0: {targetAxisIndex: 0},
-          1: {targetAxisIndex: 1}
+          1: {targetAxisIndex: 1},
+          2: {targetAxisIndex: 1, lineDashStyle: [2, 2],},
         },
         hAxis: {
           title: ''
@@ -127,6 +147,7 @@ function drawBasic() {
           // Adds titles to each axis.
           0: {title: ')'},
           1: {title: ''},
+          2: {title: ''},
           viewWindow: {
             min:0
           }

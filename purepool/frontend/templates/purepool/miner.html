@@ -46,7 +46,12 @@
       <div class="col-sm">
         <h3>Transactions</h3>
         
-        <p>Current bbp: {{ miner.balance }}</p>
+        <p><b>Your current BBP: {{ miner.balance }}</b></p>
+
+        <p>
+        <small>BBP for blocks will be shown 24h after a block was found.</small>
+        <small>The pool sends the BBP to your wallet between 18:00 and 22:00 UTC every day.</small>
+        </p>
         
         <p>Last 100 transactions:</p>
         <table class="table">
