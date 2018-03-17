@@ -86,6 +86,10 @@ POOL_MINIMUM_AUTOSEND = {
 # all solutions and works older then x-days will be removed from the system
 POOL_CLEANUP_MAXDAYS = 14
 
+# Solutions are stored in the database, but after some days, the content is removed
+# to reduce the data load. We don't need the solution content itself for the shares
+POOL_SOLUTION_CONTENT_KEEP_DAYS = 2
+
 # enabled the pool interface (used by the miners to connect) for this installation
 # can be disabled to run only the interface on this maschine
 ENABLE_POOL_INTERFACE = True

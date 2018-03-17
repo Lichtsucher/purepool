@@ -44,18 +44,18 @@ class BiblePayRpcClient(object):
         }
         We want the "pinfo" field, which is the max nounce we accept
         """
-        
+
         return self.rpc.exec('pinfo')
 
-    def subsidy(self, height):        
+    def subsidy(self, height):
         data = self.rpc.exec("subsidy", str(height))
-        
+
         if data.get('error', None) == 'block not found':
             raise BlockNotFound()
-        
+
         if data.get('error', None) is not None:
             raise UnknownServerMessage()
-        
+
         return data
     
     def bible_hash(self, block_hash, block_time, prev_block_time, prev_height, nonce):

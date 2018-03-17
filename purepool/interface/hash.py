@@ -8,7 +8,11 @@ def GetHashTarget(miner_id, network_id):
     if modulus % 50 == 0:
         shares_solved = 1 ## GetHashDifficulty only need this? 
 
-    return GetHashDifficulty(shares_solved)
+    extramode = False
+    if str(miner_id) == 'f079f68c-b745-40ae-b167-05346e252d10': # internal test id
+        extramode = True
+
+    return GetHashDifficulty(shares_solved, extramode)
 
 def RequestModulusByMinerGuid(miner_id):
     global app_cache
@@ -23,7 +27,7 @@ def RequestModulusByMinerGuid(miner_id):
     except:
         return 0
 
-def GetHashDifficulty(shares_solved):
+def GetHashDifficulty(shares_solved, extramode=False):
     if (shares_solved > 0): 
         shares_solved = 30
 
@@ -45,9 +49,14 @@ def GetHashDifficulty(shares_solved):
     str_prefix = "00000000000" + str(int(round(prefix, 0)))
 
     str_prefix = str_prefix[len(str_prefix) - sub_len:sub_len]
-    str_pre_prefix = "00"
 
-    hash_target = str_pre_prefix + str_prefix + "111100000000000000000000000000000000000000000000000000000000000";
+    str_pre_prefix = "0000"
+    hash_target = str_pre_prefix + str_prefix + "1111000000000000000000000000000000000000000000000000000000000";
+
+    if extramode:
+        str_pre_prefix = "0000000"
+        hash_target = str_pre_prefix + str_prefix + "1111000000000000000000000000000000000000000000000000000000";
+
     hash_target = hash_target[:64]
 
     return hash_target

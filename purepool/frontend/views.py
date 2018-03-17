@@ -5,6 +5,7 @@ from django.views.decorators.cache import cache_page
 from django.shortcuts import render
 from django.urls import reverse
 from django.utils import timezone
+from django.db.models import Count, Sum
 from django.http import HttpResponseRedirect, JsonResponse
 from purepool.frontend.forms import MinerForm
 from purepool.frontend.statistics import get_solution_statistics, get_block_statistics, get_top_miners, get_basic_statistics, get_miner_solution_statistics
@@ -64,22 +65,6 @@ def howtojoin(request, network):
     })
 
 
-def statistics_json(request, network):
-    """ returns the basic statistics as json string """
-
-    days = 1
-    current_height, all_blocks, pool_blocks, pool_blocks_percent, bbp_mined = get_basic_statistics(network, days)
-
-    return JsonResponse({
-          'network': network,
-          'days': days,
-          'current_height': current_height,
-          'all_blocks': all_blocks,
-          'pool_blocks': pool_blocks,
-          'pool_blocks_percent': pool_blocks_percent,
-          'bbp_mined': bbp_mined,
-        })
-
 def statistics(request, network):
     """ some nice statistics for the whole pool """
 
@@ -123,3 +108,37 @@ def statistics(request, network):
           'pool_blocks_percent': pool_blocks_percent,
           'bbp_mined': bbp_mined,
         })
+
+
+
+############################################# API
+
+@cache_page(60 * 1)
+def api_statistics(request, network):
+    """ returns the basic statistics as json string """
+
+    days = 1
+    current_height, all_blocks, pool_blocks, pool_blocks_percent, bbp_mined = get_basic_statistics(network, days)
+
+    return JsonResponse({
+          'network': network,
+          'days': days,
+          'current_height': current_height,
+          'all_blocks': all_blocks,
+          'pool_blocks': pool_blocks,
+          'pool_blocks_percent': pool_blocks_percent,
+          'bbp_mined': bbp_mined,
+        })
+
+@cache_page(60 * 10)
+def api_block_subsidysum(request, network, days):
+    """ returns a sum of all subsidies of the blocks found in "days". It is used to
+        calculate the revenue of the masternodes """
+
+    day = timezone.now() - datetime.timedelta(days=days)
+    values = Block.objects.filter(network=network, inserted_at__gte=day).aggregate(total=Sum('subsidy'), count=Count('height'))
+    
+    return JsonResponse({
+        'sum': values['total'],
+        'count': values['count'],
+    })

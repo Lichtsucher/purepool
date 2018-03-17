@@ -29,6 +29,12 @@ class TransactionInvalid(Exception):
 class TransactionTampered(Exception):
     pass
 
+class Biblepayd_Outdated(Exception):
+    pass
+
+class Invalid_CPID(Exception):
+    pass
+
 def validate_solution(network, solution_string):
     """ the validation of a solution is a multi-step part
         done here. We need to:
@@ -76,6 +82,15 @@ def validate_solution(network, solution_string):
 
     if not settings.POOL_ADDRESS[network] in addresses:
         raise TransactionTampered('Invalid recipient')
+
+    # we only accept solutions from users with a valid CPID.
+    # From 1.1.1.1c, the biblepay client returns a info about that in the
+    # hexblocktocoinbase request
+    if not 'cpid_sig_valid' in coinbase:
+        raise Biblepayd_Outdated('cpid_sig_valid missing. Upgrade to 1.1.1.c or later')
+
+    if not coinbase['cpid_sig_valid']:
+        raise Invalid_CPID()
 
     # this is a check on the nonce, it must be smaller then the currently
     # allowed max nonce value. If not, somebody tried something bad
@@ -149,10 +164,15 @@ def process_solution(network, solution_s):
 def cleanup_solutions():
     """ removes old works, solutions and rejected solutions from the database """
     
+    # base cleanup
     min_date = timezone.now() - datetime.timedelta(days=settings.POOL_CLEANUP_MAXDAYS)
     
     Work.objects.filter(inserted_at__lt=min_date).delete()
     Solution.objects.filter(inserted_at__lt=min_date).delete()
     RejectedSolution.objects.filter(inserted_at__lt=min_date).delete()
-        
+
+    # remove solution content after x days. Solutions entries itself are stored longer, see above
+    min_date_solutions = timezone.now() - datetime.timedelta(days=settings.POOL_SOLUTION_CONTENT_KEEP_DAYS)
+
+    Solution.objects.filter(inserted_at__lt=min_date_solutions).update(solution='')
         

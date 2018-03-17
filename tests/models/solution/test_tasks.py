@@ -6,7 +6,7 @@ from django.test import TestCase
 from purepool.interface.formats import SolutionString
 from purepool.models.miner.models import Miner, Worker
 from purepool.models.solution.models import Solution, Work, RejectedSolution
-from purepool.models.solution.tasks import process_solution, validate_solution, cleanup_solutions, UnknownWork, HashTargetExceeded, BibleHashWrong, TransactionInvalid, TransactionTampered, InvalidSolution
+from purepool.models.solution.tasks import process_solution, validate_solution, cleanup_solutions, UnknownWork, HashTargetExceeded, BibleHashWrong, TransactionInvalid, TransactionTampered, InvalidSolution, Invalid_CPID, Biblepayd_Outdated
 
 class validate_solutionTestCase(TestCase):
     
@@ -64,7 +64,7 @@ class validate_solutionTestCase(TestCase):
             # fail if the target address in the transaction is not from the pool
             trans_result = {'recipient': 'yiCwAb9qeaQqzDX5jQZJgBQ9mRy2aqk2Tb'}
             with mock.patch('purepool.models.solution.tasks.BiblePayRpcClient.hexblocktocoinbase', return_value=trans_result):
-                with self.settings(POOL_ADDRESS={'test': 'ABCDEFG'}):
+                with self.settings(POOL_ADDRESS={'test': 'ABCDEFG', 'cpid_sig_valid': True}):
                     with self.assertRaises(TransactionTampered):                
                         validate_solution('test', self.solution_string)
             
@@ -76,7 +76,7 @@ class validate_solutionTestCase(TestCase):
 
             # the TX is valid here, but the nonce is not right!
             with self.settings(POOL_ADDRESS={'test': 'ABCDEFG'}):
-                trans_result = {'recipient': 'ABCDEFG'}
+                trans_result = {'recipient': 'ABCDEFG', 'cpid_sig_valid': True}
                 with mock.patch('purepool.models.solution.tasks.BiblePayRpcClient.hexblocktocoinbase', return_value=trans_result):
                     with mock.patch('purepool.models.solution.tasks.BiblePayRpcClient.pinfo', return_value={'pinfo': 3, 'height': 0}):
                         with self.assertRaises(TransactionTampered):
@@ -84,15 +84,31 @@ class validate_solutionTestCase(TestCase):
 
             # Here the prev_height was faked
             with self.settings(POOL_ADDRESS={'test': 'ABCDEFG'}):
-                trans_result = {'recipient': 'ABCDEFG'}
+                trans_result = {'recipient': 'ABCDEFG', 'cpid_sig_valid': True}
                 with mock.patch('purepool.models.solution.tasks.BiblePayRpcClient.hexblocktocoinbase', return_value=trans_result):
                     with mock.patch('purepool.models.solution.tasks.BiblePayRpcClient.pinfo', return_value={'pinfo': 999999, 'height': 19}):
                         with self.assertRaises(TransactionTampered):
                             validate_solution('test', self.solution_string)
+
+            # now cpid_sig_valid is missing -> old biblepay server client
+            with self.settings(POOL_ADDRESS={'test': 'ABCDEFG'}):
+                trans_result = {'recipient': 'ABCDEFG'}
+                with mock.patch('purepool.models.solution.tasks.BiblePayRpcClient.hexblocktocoinbase', return_value=trans_result):
+                    with mock.patch('purepool.models.solution.tasks.BiblePayRpcClient.pinfo', return_value={'pinfo': 999999, 'height': 19}):
+                        with self.assertRaises(Biblepayd_Outdated):
+                            validate_solution('test', self.solution_string)
+
+            # and now cpid_sig_valid is False
+            with self.settings(POOL_ADDRESS={'test': 'ABCDEFG'}):
+                trans_result = {'recipient': 'ABCDEFG', 'cpid_sig_valid': False}
+                with mock.patch('purepool.models.solution.tasks.BiblePayRpcClient.hexblocktocoinbase', return_value=trans_result):
+                    with mock.patch('purepool.models.solution.tasks.BiblePayRpcClient.pinfo', return_value={'pinfo': 999999, 'height': 19}):
+                        with self.assertRaises(Invalid_CPID):
+                            validate_solution('test', self.solution_string)
         
             # and now, with everything right, it should succeed
             with self.settings(POOL_ADDRESS={'test': 'ABCDEFG'}):
-                trans_result = {'recipient': 'ABCDEFG'}
+                trans_result = {'recipient': 'ABCDEFG', 'cpid_sig_valid': True}
                 with mock.patch('purepool.models.solution.tasks.BiblePayRpcClient.hexblocktocoinbase', return_value=trans_result):
                     with mock.patch('purepool.models.solution.tasks.BiblePayRpcClient.pinfo', return_value={'pinfo': 999999, 'height': 19309}):
                         self.assertTrue(validate_solution('test', self.solution_string))
