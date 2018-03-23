@@ -85,4 +85,6 @@ class BiblePayRpcClient(object):
 
         return self.rpc.sendtoaddress(address, amount, comment, comment_to, subtractfeefromamount)
     
+    def getwalletinfo(self):
+        return self.rpc.getwalletinfo()
     
