@@ -19,3 +19,6 @@
 
 # resets the statistics cache. Required, as per default it is multiple hours valid
 */5 * * * * celery /srv/purepool_env/bin/python3 /srv/purepool/manage.py reset_statistics_cache
+
+# recalculates the rating of all active miners. The rating defines the difficulty of the HashTarget
+30 * * * * celery /srv/purepool_env/bin/python3 /srv/purepool/manage.py evaluate_miner main

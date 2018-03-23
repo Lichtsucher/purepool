@@ -31,7 +31,7 @@ class ActionViewTestCase(TestCase):
         # we need to load the miner from the db to get its id
         miner = Miner.objects.all()[0]
         work = Work.objects.all()[0]
-        rs = "<RESPONSE> <ADDRESS>ABCDEFG</ADDRESS><HASHTARGET>0001111000000000000000000000000000000000000000000000000000000000</HASHTARGET><MINERGUID>%s</MINERGUID><WORKID>%s</WORKID></RESPONSE>" % (miner.id, work.pk)
+        rs = "<RESPONSE> <ADDRESS>ABCDEFG</ADDRESS><HASHTARGET>0000011110000000000000000000000000000000000000000000000000000000</HASHTARGET><MINERGUID>%s</MINERGUID><WORKID>%s</WORKID></RESPONSE>" % (miner.id, work.pk)
         
         self.assertEqual(response.content, rs.encode('ascii'))
         

@@ -114,6 +114,17 @@ class Miner(models.Model):
     # indeed, we need the network, as we might support test and main at the same time
     network = models.CharField(max_length=20)
 
+    # the rating is used in the Worker Difficutly calculation to ensure that no ineffective
+    # miner steals shares
+    # Ratings:
+    #  -2 = Extremly good miner. Very Easy difficulty
+    #  -1 = Very good miner. Easy difficulty
+    #   0 = Default. Normal difficutly
+    #   1 = Little bit bad miner, littly bit harder diffituly
+    #   2 = Bad miner, lot harder
+    #   3 = Extremly bad miner. VERY hard diffictuly
+    rating = models.IntegerField(default=0)
+
     # the cached balance for this user
     # Calculated based upon the transactions
     balance = models.DecimalField(max_digits=14, decimal_places=4, default=0)
