@@ -125,6 +125,13 @@ class Miner(models.Model):
     #   3 = Extremly bad miner. VERY hard diffictuly
     rating = models.IntegerField(default=0)
 
+    # an info-only field. The ratio is the base for the rating and is calculated by
+    # comparing the users shares per block with the shares/block of other miners
+    ratio = models.DecimalField(max_digits=14, decimal_places=4, default=0)
+
+    # The percent different between the miner ratio and the average int he pool
+    percent_ratio = models.DecimalField(max_digits=14, decimal_places=4, default=100)
+
     # the cached balance for this user
     # Calculated based upon the transactions
     balance = models.DecimalField(max_digits=14, decimal_places=4, default=0)

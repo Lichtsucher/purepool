@@ -40,6 +40,27 @@
             {% endfor %}
           </tbody>
         </table>        
+
+        <h3>Infos</h3>
+
+        <table class="table">
+          <tbody>
+            <tr>
+              <th scope="row">Ratio</th>
+              <td>{{ miner.ratio }}</td>
+            </tr>
+            <tr>
+              <td colspan="2"><small>Ratio = Amount of your shares required until a block was found in average</small></td>
+            </tr>
+            <tr>
+              <th scope="row">Ratio/Percent</th>
+              <td>{{ miner.percent_ratio }} %</td>
+            </tr>
+            <tr>
+              <td colspan="2"><small>Your ratio compared to the average of the pool. 100% = on the level of the pool. Values over 150% will increase your work difficulty. Lower values are better.</small></td>
+            </tr>
+          </tbody>
+        </table>       
         
       </div>      
       
