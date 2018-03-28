@@ -1,6 +1,7 @@
 import datetime
 from django.utils import timezone
 from django.conf import settings
+from django.db import connection
 from celery import shared_task
 from bitcoinrpc.authproxy import JSONRPCException
 from purepool.interface.formats import SolutionString
@@ -162,17 +163,34 @@ def process_solution(network, solution_s):
     
 @shared_task()
 def cleanup_solutions():
-    """ removes old works, solutions and rejected solutions from the database """
+    """ removes old works, solutions and rejected solutions from the database.
+        We use raw sql, as djangos delete queries are very slow as bulk queries """
     
-    # base cleanup
-    min_date = timezone.now() - datetime.timedelta(days=settings.POOL_CLEANUP_MAXDAYS)
-    
-    Work.objects.filter(inserted_at__lt=min_date).delete()
-    Solution.objects.filter(inserted_at__lt=min_date).delete()
-    RejectedSolution.objects.filter(inserted_at__lt=min_date).delete()
+    dformat = '%Y-%m-%d %H:%M:%S'
 
-    # remove solution content after x days. Solutions entries itself are stored longer, see above
-    min_date_solutions = timezone.now() - datetime.timedelta(days=settings.POOL_SOLUTION_CONTENT_KEEP_DAYS)
+    with connection.cursor() as cursor:
 
-    Solution.objects.filter(inserted_at__lt=min_date_solutions).update(solution='')
+        # rejected solutions are not required for long
+        min_date = timezone.now() - datetime.timedelta(days=settings.POOL_CLEANUP_REJECTED_MAXDAYS)
+        sql = 'DELETE FROM solution_rejectedsolution WHERE inserted_at < "'+min_date.strftime(dformat)+'"'
+        cursor.execute(sql)
+
+        # and remove old entries
+        min_date = timezone.now() - datetime.timedelta(days=settings.POOL_CLEANUP_MAXDAYS)
+        sql = 'DELETE FROM solution_solution WHERE inserted_at < "'+min_date.strftime(dformat)+'"'
+        cursor.execute(sql)
+
+        min_date = timezone.now() - datetime.timedelta(days=settings.POOL_CLEANUP_MAXDAYS+2) # work is used longer, so we need to keep it longer
+        sql = 'DELETE FROM solution_work WHERE inserted_at < "'+min_date.strftime(dformat)+'"'
+        cursor.execute(sql)
+
+        # remove solution content after x days. Solutions entries itself are stored longer, see above
+        min_date_solutions = timezone.now() - datetime.timedelta(days=settings.POOL_SOLUTION_CONTENT_KEEP_DAYS)
+        Solution.objects.filter(inserted_at__lt=min_date_solutions).update(solution='')
+
+
+
+
+
+
         

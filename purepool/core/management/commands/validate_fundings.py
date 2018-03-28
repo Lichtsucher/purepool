@@ -37,7 +37,10 @@ class Command(TaskCommand):
 
         existing_balance = decimal.Decimal(walletinfo['balance']) + decimal.Decimal(walletinfo['immature_balance'])
 
-        print('Required:', round(required_balance, 3), 'Existing:', round(existing_balance, 3), 'Diff:', round(existing_balance-required_balance, 3))
+        print('Required:', round(required_balance, 3), 'Total Balance:', round(existing_balance, 3))
+        print('Diff:', round(existing_balance-required_balance, 3))
+        print('\n---\n')
+        print('Required (Balance):', sum_balance, 'Mature balance:', walletinfo['balance'])
 
 
         
