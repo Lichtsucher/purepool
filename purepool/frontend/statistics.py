@@ -65,6 +65,15 @@ def get_top_miners(network, days=1):
     days24_dt = timezone.now() - datetime.timedelta(days=days)
     return Solution.objects.filter(network=network, miner__enabled=True, inserted_at__gte=days24_dt).values('miner__address').annotate(total=Count('miner_id')).order_by('-total')[0:100]
 
+@cache_memoize(timeout=186400)
+def get_miner_count(network, days):
+    """ miner count is cached longer, as it is expensice to count by the solutions """
+
+    days_dt = timezone.now() - datetime.timedelta(days=days)
+    miners_count = len(Solution.objects.filter(network=network, ignore=False, inserted_at__gte=days_dt).values('miner_id').annotate(total=Count('miner_id')))
+
+    return miners_count
+
 @cache_memoize(timeout=3600)
 def get_basic_statistics(network, days):
     """ some statistics for the statistics page about the pool and the network """
@@ -87,5 +96,5 @@ def get_basic_statistics(network, days):
         pass
 
     bbp_mined = Block.objects.filter(network=network, pool_block=True, inserted_at__gte=days_dt).aggregate(Sum('subsidy'))['subsidy__sum']
-    
+
     return [current_height, all_blocks, pool_blocks, pool_blocks_percent, bbp_mined]

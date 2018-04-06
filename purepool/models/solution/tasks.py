@@ -1,4 +1,6 @@
 import datetime
+import random
+from django.core.cache import cache
 from django.utils import timezone
 from django.conf import settings
 from django.db import connection
@@ -6,6 +8,7 @@ from celery import shared_task
 from bitcoinrpc.authproxy import JSONRPCException
 from purepool.interface.formats import SolutionString
 from purepool.models.solution.models import Solution, Work, RejectedSolution
+from purepool.models.miner.models import Miner
 from biblepay.clients import BiblePayRpcClient
 from biblepay.hash import check_hashtarget
 
@@ -34,6 +37,9 @@ class Biblepayd_Outdated(Exception):
     pass
 
 class Invalid_CPID(Exception):
+    pass
+
+class Illegal_CPID(Exception):
     pass
 
 def validate_solution(network, solution_string):
@@ -93,6 +99,9 @@ def validate_solution(network, solution_string):
     if not coinbase['cpid_sig_valid']:
         raise Invalid_CPID()
 
+    if not coinbase['cpid_legal']:
+        raise Illegal_CPID()
+
     # this is a check on the nonce, it must be smaller then the currently
     # allowed max nonce value. If not, somebody tried something bad
     pinfo = client.pinfo()
@@ -106,14 +115,53 @@ def validate_solution(network, solution_string):
 
     return True
 
+def calculate_multiply(solution_string):
+    """ Some miners are punished for being bad at finding blocks,
+        while others are boosted for being good at that. """
+
+    miner_id = str(solution_string.get_miner_id())
+    key = 'miner_id__percent_ratio__' + miner_id
+    percent_ratio = cache.get(key, None)
+
+    multiply_solution = 1 # default
+
+    if percent_ratio is None:
+        miner = Miner.objects.get(pk=miner_id)
+        percent_ratio = miner.percent_ratio
+        cache.set(key, percent_ratio)
+
+    if percent_ratio > 120:
+        # we only allow the solution if the random value
+        # is under 101. The higher the percent_ratio, the more unlikely
+        # it if that this is true, so more solutions are dropped
+        rand_val = random.randrange(0, int(percent_ratio))
+        if rand_val > 100:
+            multiply_solution = 0
+
+    if percent_ratio < 30:
+        multiply_solution = 4
+    elif percent_ratio < 40:
+        multiply_solution = 3
+    elif percent_ratio < 60:
+        multiply_solution = 2
+
+    return multiply_solution
+
 @shared_task()
 def process_solution(network, solution_s):
     """ called by the celery task queue
         Does the validation and processing of a new solution """
         
     # https://en.bitcoin.it/wiki/Block_hashing_algorithm
-
     solution_string = SolutionString(solution_s)
+
+
+    # before we start, we check if we wan't to keep the solution at all,
+    # or if the percent ratio is to bad
+    multiply_solution = calculate_multiply(solution_string) # very good miners are getting there solutions multiplied to reach 100%
+    
+    if multiply_solution == 0: # droped because of low percent_ratio? Then we can leave here
+        return
 
     # first, we check if the biblehash already exists. If yes, we ignore the solution
     # This way, we can skip all the later parts of checking the solution and speed up
@@ -149,17 +197,26 @@ def process_solution(network, solution_s):
     hps = 1000 * solution_string.get_hash_counter() / runtime
 
     # with everything checked, we insert the solution into the database
-    solution = Solution(
-        work_id = solution_string.get_work_id(),
-        miner_id = solution_string.get_miner_id(),
-        network = network,
+    # we also do the multi insert here for good miners
+    for r in range(0, multiply_solution):
+        bible_hash = solution_string.get_bible_hash()
 
-        bible_hash = solution_string.get_bible_hash(),
-        solution = solution_s,
+        if r > 0:
+            bible_hash += '#'+str(r)
 
-        hps = hps,
-    )
-    solution.save()
+        solution = Solution(
+            work_id = solution_string.get_work_id(),
+            miner_id = solution_string.get_miner_id(),
+            network = network,
+
+            bible_hash = bible_hash,
+            solution = solution_s,
+
+            hps = hps,
+        )
+        solution.save()
+    
+    
     
 @shared_task()
 def cleanup_solutions():

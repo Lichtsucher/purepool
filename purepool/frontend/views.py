@@ -8,7 +8,7 @@ from django.utils import timezone
 from django.db.models import Count, Sum
 from django.http import HttpResponseRedirect, JsonResponse
 from purepool.frontend.forms import MinerForm
-from purepool.frontend.statistics import get_solution_statistics, get_block_statistics, get_top_miners, get_basic_statistics, get_miner_solution_statistics
+from purepool.frontend.statistics import get_solution_statistics, get_block_statistics, get_top_miners, get_basic_statistics, get_miner_solution_statistics, get_miner_count
 from purepool.models.miner.models import Miner
 from purepool.models.solution.models import Solution
 from purepool.models.block.models import Block
@@ -73,6 +73,8 @@ def statistics(request, network):
 
     current_height, all_blocks, pool_blocks, pool_blocks_percent, bbp_mined = get_basic_statistics(network, days)
 
+    miners_count = get_miner_count(network, days)
+
     graph_days = 7
 
     top_miners = get_top_miners(network)
@@ -107,6 +109,7 @@ def statistics(request, network):
           'pool_blocks': pool_blocks,
           'pool_blocks_percent': pool_blocks_percent,
           'bbp_mined': bbp_mined,
+          'miners_count': miners_count,
         })
 
 
@@ -119,6 +122,7 @@ def api_statistics(request, network):
 
     days = 1
     current_height, all_blocks, pool_blocks, pool_blocks_percent, bbp_mined = get_basic_statistics(network, days)
+    miners_count = get_miner_count(network, days)
 
     return JsonResponse({
           'network': network,
@@ -128,6 +132,7 @@ def api_statistics(request, network):
           'pool_blocks': pool_blocks,
           'pool_blocks_percent': pool_blocks_percent,
           'bbp_mined': bbp_mined,
+          'miners_count': miners_count,
         })
 
 @cache_page(60 * 10)

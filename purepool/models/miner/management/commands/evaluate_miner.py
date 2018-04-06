@@ -76,17 +76,17 @@ class Command(TaskCommand):
                 rating = 3
 
             # very good miners are getting a special boost
-            if miner_blocks > 2 and percent_diff < 80:
+            if miner_blocks > 5 and percent_diff < 80:
                 rating = -1
 
-            if miner_blocks > 2 and percent_diff < 50:
+            if miner_blocks > 5 and percent_diff < 70:
                 rating = -2
 
-            if miner_blocks > 3 and percent_diff < 30:
+            if miner_blocks > 5 and percent_diff < 60:
                 rating = -3
 
-            if miner_blocks > 3 and percent_diff < 10:
-                rating = -4
+            #if miner_blocks > 5 and percent_diff < 40:
+            #    rating = -4
 
             # special for small miners: if they hadn't found a block, but
             # have a very small percent_diff, we set the rating to 0
