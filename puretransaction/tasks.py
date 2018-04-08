@@ -1,5 +1,7 @@
 import time
 import traceback
+import datetime
+from django.utils import timezone
 from celery import shared_task
 from django.conf import settings
 from django.db import transaction
@@ -28,6 +30,13 @@ def send_autopayments(network):
     
     miner_pos = 0
     for miner in miners:
+        # we only send payments for miners who hadn't a payment in the last 12 hours
+        last_trans_dt = timezone.now() - datetime.timedelta(hours=12)
+        last_trans_count = Transaction.objects.filter(miner_id=miner['id'], network=network, category='TX', inserted_at__gt=last_trans_dt).count()
+
+        if last_trans_count > 0:
+            continue
+
         miner_pos += 1
 
         with transaction.atomic():

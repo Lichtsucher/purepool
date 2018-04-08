@@ -1,4 +1,6 @@
+import datetime
 from unittest import mock
+from django.utils import timezone
 from django.conf import settings
 from django.test import TestCase, override_settings
 from purepool.models.miner.models import Miner
@@ -22,7 +24,8 @@ class send_autopaymentsTestCase(TestCase):
         
     @override_settings(POOL_MINIMUM_AUTOSEND = {'main': 10, 'test': 10})
     @mock.patch('puretransaction.tasks.BiblePayRpcClient.sendtoaddress', return_value="TXTEST")
-    def test_wrongvalue(self, mock_sendtoaddress):
+    @mock.patch('time.sleep', return_value="")
+    def test_wrongvalue(self, mock_sendtoaddress, mock_sleep):
         # balance in Miner table is higher then the real balance
         send_autopayments("test")
         
@@ -33,7 +36,8 @@ class send_autopaymentsTestCase(TestCase):
     
     @override_settings(POOL_MINIMUM_AUTOSEND = {'main': 10, 'test': 10})
     @mock.patch('puretransaction.tasks.BiblePayRpcClient.sendtoaddress', return_value="TXTEST")
-    def test_outdated_value(self, mock_sendtoaddress):
+    @mock.patch('time.sleep', return_value="")
+    def test_outdated_value(self, mock_sendtoaddress, mock_sleep):
         # balance is high enough, but not right
         
         Transaction(miner=self.miner1, amount=10, network="test").save()
@@ -61,7 +65,8 @@ class send_autopaymentsTestCase(TestCase):
     
     @override_settings(POOL_MINIMUM_AUTOSEND = {'main': 10, 'test': 10})
     @mock.patch('puretransaction.tasks.BiblePayRpcClient.sendtoaddress', return_value="TXTEST")
-    def test_process(self, mock_sendtoaddress):
+    @mock.patch('time.sleep', return_value="")
+    def test_process(self, mock_sendtoaddress, mock_sleep):
         # a successfull run
         
         Transaction(miner=self.miner1, amount=30, network="test").save()
@@ -83,9 +88,47 @@ class send_autopaymentsTestCase(TestCase):
         self.assertEqual(tx.miner.id, miner1.id)
         self.assertEqual(tx.network, "test")
 
+
+        # even with a new balance, should not pay again, as we do not pay so early again
+        Transaction(miner=self.miner1, amount=16, network="test").save()
+
+        self.miner1.update_balance()
+        self.miner1.save()
+
+        send_autopayments("test")
+
+        miner1 = Miner.objects.get(pk=self.miner1.id)
+        self.assertEqual(miner1.balance, 16)
+
+        self.assertEqual(Transaction.objects.filter(category='TX').count(), 1)
+        
+        tx = Transaction.objects.get(category='TX')
+        self.assertEqual(tx.amount, -44)
+        self.assertEqual(tx.miner.id, miner1.id)
+        self.assertEqual(tx.network, "test")
+
+
+        # but if first_trans is older, then the second one should be paid
+        tx.inserted_at = timezone.now() - datetime.timedelta(hours=18)
+        tx.save()
+
+        send_autopayments("test")
+
+        miner1 = Miner.objects.get(pk=self.miner1.id)
+        self.assertEqual(miner1.balance, 0)
+
+        self.assertEqual(Transaction.objects.filter(category='TX').count(), 2)
+        
+        tx = Transaction.objects.filter(category='TX').order_by('-id')[0]
+        self.assertEqual(tx.amount, -16)
+        self.assertEqual(tx.miner.id, miner1.id)
+        self.assertEqual(tx.network, "test")
+
+
+
     @override_settings(POOL_MINIMUM_AUTOSEND = {'main': 10, 'test': 10})
     @mock.patch('puretransaction.tasks.BiblePayRpcClient.sendtoaddress', return_value="TXTEST")
-    def test_process(self, mock_sendtoaddress):
+    def test_process_failed(self, mock_sendtoaddress):
         mock_sendtoaddress.side_effect = Exception()
 
         # a successfull run
