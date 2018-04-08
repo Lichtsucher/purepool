@@ -1,5 +1,5 @@
 # resets the statistics cache. Required, as per default it is multiple hours valid
-*/5 * * * * celery /srv/purepool_env/bin/python3 /srv/purepool/manage.py reset_statistics_cache
+*/5 * * * * www-data /srv/purepool_env/bin/python3 /srv/purepool/manage.py reset_statistics_cache
 
 # As above, but also resets the long running caches
-1 1 * * * celery /srv/purepool_env/bin/python3 /srv/purepool/manage.py reset_statistics_cache --daily
+1 1 * * * www-data /srv/purepool_env/bin/python3 /srv/purepool/manage.py reset_statistics_cache --daily
