@@ -41,6 +41,28 @@
           </tbody>
         </table>        
 
+        {% if error_msgs %}
+        <h3>Errors</h3>
+        <small>List of errors related to your miner in the last 24h</small>
+        <table class="table">
+          <tbody>
+            <tr>
+              <th>Errormessage</th>
+              <th>Count</th>
+            </tr>
+            
+            {% for error_msg in error_msgs %}
+            <tr>
+              <td>{{ error_msg.exception_type }}</td>
+              <td>{{ error_msg.total }}</td>
+            </tr>
+            {% endfor %}
+
+          </tbody>
+        </table>
+        {% endif %}
+
+        <!--
         <h3>Infos</h3>
 
         <table class="table">
@@ -60,7 +82,8 @@
               <td colspan="2"><small>Your ratio compared to the average of the pool. 100% = on the level of the pool. Values over 150% will increase your work difficulty. Lower values are better.</small></td>
             </tr>
           </tbody>
-        </table>       
+        </table>
+        -->
         
       </div>      
       

@@ -173,15 +173,20 @@ def process_solution(network, solution_s):
     valid = False
     try:
         valid = validate_solution(network, solution_string)
-    except:
+    except Exception as ex:
+        rsol = solution_s
+            
+        exception_type = type(ex).__name__
+
         rsolution = RejectedSolution(
             work_id = solution_string.get_work_id(),
             miner_id = solution_string.get_miner_id(),
             network = network,
 
             bible_hash = solution_string.get_bible_hash(),
-            solution = solution_s,
-            hps=0
+            solution = rsol,
+            hps=0,
+           exception_type = exception_type,
         )
         rsolution.save()        
         
@@ -210,7 +215,7 @@ def process_solution(network, solution_s):
             network = network,
 
             bible_hash = bible_hash,
-            solution = solution_s,
+            solution = '', # no longer needed
 
             hps = hps,
         )

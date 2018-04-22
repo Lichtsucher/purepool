@@ -1,0 +1,71 @@
+- model: miner.Miner
+  pk: d095c69c255f40b0ac8914b6e56211e2
+  fields:
+    address: B9p129pcccc8SdpNivi2fxBk8PLLnXxwii
+    network: main
+    inserted_at: 2018-04-22 12:00:00
+    
+- model: miner.Worker
+  pk: 1
+  fields:
+    miner: d095c69c255f40b0ac8914b6e56211e2
+    name: Default
+    inserted_at: 2018-04-22 12:00:00
+  
+- model: block.Block
+  pk: 1
+  fields:
+    height: 1
+    network: main
+    pool_block: 1
+    miner: d095c69c255f40b0ac8914b6e56211e2
+    subsidy: 500
+    recipient: B999999999999999999999999999999999
+    inserted_at: 2018-04-22 12:00:00
+ 
+- model: solution.Work
+  pk: 0000c69c255f40b0ac8914b6e5620000
+  fields:
+    worker: 1
+    thread_id: 1
+    hash_target: 010000000000000000000000000000000
+    network: main
+    ip: 0.0.0.0
+    os: LIN
+    agent: 1.1.1.1
+    inserted_at: 2018-04-22 12:00:00
+ 
+- model: solution.Solution
+  pk: 1
+  fields:
+    work: 0000c69c255f40b0ac8914b6e5620000
+    miner: d095c69c255f40b0ac8914b6e56211e2
+    network: main
+    bible_hash: 1234567890
+    solution: EMPTY
+    hps: 100
+    inserted_at: 2018-04-22 12:00:00
+    
+- model: solution.RejectedSolution
+  pk: 1
+  fields:
+    work: 0000c69c255f40b0ac8914b6e5620000
+    miner: d095c69c255f40b0ac8914b6e56211e2
+    network: main
+    bible_hash: 1234567890
+    solution: EMPTY
+    hps: 100
+    exception_type: BibleHashAlreadyKnown
+    inserted_at: 2018-04-22 12:00:00
+
+- model: solution.RejectedSolution
+  pk: 2
+  fields:
+    work: 0000c69c255f40b0ac8914b6e5620000
+    miner: d095c69c255f40b0ac8914b6e56211e2
+    network: main
+    bible_hash: 56856856856
+    solution: EMPTY
+    hps: 100
+    exception_type: BibleHashWrong
+    inserted_at: 2018-04-22 12:00:00    

@@ -82,4 +82,5 @@ class Solution(BaseSolution):
 class RejectedSolution(BaseSolution):
     """ saves all the rejected solutions, to analyze them later """
     
-    pass 
+    exception_type = models.CharField(max_length=200, default='', blank=True)
+    

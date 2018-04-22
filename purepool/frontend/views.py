@@ -8,7 +8,7 @@ from django.utils import timezone
 from django.db.models import Count, Sum
 from django.http import HttpResponseRedirect, JsonResponse
 from purepool.frontend.forms import MinerForm
-from purepool.frontend.statistics import get_solution_statistics, get_block_statistics, get_top_miners, get_basic_statistics, get_miner_solution_statistics, get_miner_count
+from purepool.frontend.statistics import get_solution_statistics, get_block_statistics, get_top_miners, get_basic_statistics, get_miner_solution_statistics, get_miner_count, miner_error_message_statistic
 from purepool.models.miner.models import Miner
 from purepool.models.solution.models import Solution
 from purepool.models.block.models import Block
@@ -45,6 +45,8 @@ def miner(request, network, address):
     share_statistics = get_miner_solution_statistics(network, miner_id=miner.id)
     transactions = Transaction.objects.filter(network=network, miner=miner).order_by('-id')[0:100]
     workers = Miner.get_active_worker(network, address, 1)
+    
+    error_msgs = miner_error_message_statistic(network, miner_id=miner.id)
 
     return render(request, 'purepool/miner.html', {
           'address': address,
@@ -53,6 +55,7 @@ def miner(request, network, address):
           'workers': workers,
           'share_statistics': share_statistics,
           'transactions': transactions,
+          'error_msgs': error_msgs,
         })
 
 @cache_page(60 * 1)

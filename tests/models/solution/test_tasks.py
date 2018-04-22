@@ -212,7 +212,7 @@ class process_solutionTestCase(TestCase):
         self.assertEqual(solution.miner_id, self.miner.id)
         self.assertEqual(solution.work_id, self.work.id)
         self.assertEqual(solution.bible_hash, self.solution_string.get_bible_hash())
-        self.assertEqual(solution.solution, self.solution_s)
+        self.assertEqual(solution.solution, '') #self.solution_s)
         self.assertEqual(solution.hps, 467)
 
     def test_valid_multiply(self):
@@ -232,7 +232,7 @@ class process_solutionTestCase(TestCase):
         self.assertEqual(solution.miner_id, self.miner.id)
         self.assertEqual(solution.work_id, self.work.id)
         self.assertEqual(solution.bible_hash, self.solution_string.get_bible_hash())
-        self.assertEqual(solution.solution, self.solution_s)
+        self.assertEqual(solution.solution, '') # self.solution_s)
         self.assertEqual(solution.hps, 467)
         
     def test_invalid(self):
