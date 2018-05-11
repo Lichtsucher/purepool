@@ -118,6 +118,9 @@ def validate_solution(network, solution_string):
 def calculate_multiply(solution_string):
     """ Some miners are punished for being bad at finding blocks,
         while others are boosted for being good at that. """
+    
+    # this code is no longer required, so re skip the logic here
+    return 1
 
     miner_id = str(solution_string.get_miner_id())
     key = 'miner_id__percent_ratio__' + miner_id
