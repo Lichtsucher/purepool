@@ -14,10 +14,19 @@ class find_new_blocksTestCase(TestCase):
     def setUp(self):
         self.miner = Miner(network="test", address="B91RjV9UoZa5qLNbWZFXJ42sFWbJCyxxxx")
         self.miner.save()
+        
+        self.block_time = datetime.datetime(2017, 9, 9, 11, 12, 13, 15, tzinfo=datetime.timezone.utc)
                 
     @override_settings(POOL_ADDRESS={'test': 'POOLADDR'})
     def test_basic(self):
-        with mock.patch('purepool.models.block.tasks.BiblePayRpcClient.subsidy') as mock_subsidy:
+        test_block_time1 = datetime.datetime(2017, 9, 9, 11, 12, 13, 15, tzinfo=datetime.timezone.utc)
+        test_block_time2 = datetime.datetime(2018, 9, 9, 11, 12, 13, 15, tzinfo=datetime.timezone.utc)
+        test_block_time3 = datetime.datetime(2019, 9, 9, 11, 12, 13, 15, tzinfo=datetime.timezone.utc)
+        test_block_time4 = datetime.datetime(2020, 9, 9, 11, 12, 13, 15, tzinfo=datetime.timezone.utc)
+        
+        with mock.patch('purepool.models.block.tasks.BiblePayRpcClient.subsidy') as mock_subsidy, \
+             mock.patch('purepool.models.block.tasks.get_block_time') as mock_get_block_time:
+            
             # the mock client will return the result for two block
             mock_subsidy.side_effect = [
                 {'subsidy': 100, 'minerguid': 'unknown', 'recipient': 'POOLADDR'},
@@ -26,6 +35,13 @@ class find_new_blocksTestCase(TestCase):
                 None
             ]
             
+            mock_get_block_time.side_effect = [
+                test_block_time1,
+                test_block_time2,
+                test_block_time3,
+                test_block_time4,
+            ]
+
             find_new_blocks('test')
 
             mock_subsidy.assert_has_calls(
@@ -42,6 +58,7 @@ class find_new_blocksTestCase(TestCase):
             self.assertEqual(block1.miner, None)
             self.assertEqual(block1.network, 'test')
             self.assertEqual(block1.recipient, 'POOLADDR')
+            self.assertEqual(block1.inserted_at, test_block_time1)            
             
             self.assertEqual(block2.height, 2)
             self.assertTrue(block2.pool_block)
@@ -49,7 +66,8 @@ class find_new_blocksTestCase(TestCase):
             self.assertEqual(block2.process_status, 'OP')
             self.assertEqual(block2.miner, self.miner)
             self.assertEqual(block2.network, 'test')
-            self.assertEqual(block2.recipient, 'POOLADDR')            
+            self.assertEqual(block2.recipient, 'POOLADDR')
+            self.assertEqual(block2.inserted_at, test_block_time2)
             
             self.assertEqual(block3.height, 3)
             self.assertFalse(block3.pool_block)
@@ -57,13 +75,15 @@ class find_new_blocksTestCase(TestCase):
             self.assertEqual(block3.process_status, 'OP')
             self.assertEqual(block3.miner, None)
             self.assertEqual(block3.network, 'test')
-            self.assertEqual(block3.recipient, 'rec')              
+            self.assertEqual(block3.recipient, 'rec')
+            self.assertEqual(block3.inserted_at, test_block_time3)
             
             # execute a second time
             mock_subsidy.side_effect = [
                 {'subsidy': 55, 'minerguid': 'unknown', 'recipient': 'xxx'},
                 None
             ]
+            
             
             find_new_blocks('test')
             
@@ -82,10 +102,12 @@ class find_new_blocksTestCase(TestCase):
             self.assertEqual(block4.process_status, 'OP')
             self.assertEqual(block4.miner, None)
             self.assertEqual(block4.network, 'test')
-            self.assertEqual(block4.recipient, 'xxx')             
+            self.assertEqual(block4.recipient, 'xxx')
+            self.assertEqual(block4.inserted_at, test_block_time4)
             
     def test_invalid_subsidy(self):
-        with mock.patch('purepool.models.block.tasks.BiblePayRpcClient.subsidy') as mock_subsidy:
+        with mock.patch('purepool.models.block.tasks.BiblePayRpcClient.subsidy') as mock_subsidy, \
+             mock.patch('purepool.models.block.tasks.get_block_time', return_value=self.block_time):
             # the mock client will return the result for two block
             mock_subsidy.side_effect = [
                 {'something': 'else'}
@@ -96,14 +118,16 @@ class find_new_blocksTestCase(TestCase):
             self.assertEqual(Block.objects.all().count(), 0)
         
     def test_blocknotfound(self):
-        with mock.patch('purepool.models.block.tasks.BiblePayRpcClient.subsidy') as mock_subsidy:
+        with mock.patch('purepool.models.block.tasks.BiblePayRpcClient.subsidy') as mock_subsidy, \
+             mock.patch('purepool.models.block.tasks.get_block_time', return_value=self.block_time):
             mock_subsidy.side_effect = BlockNotFound()
             
             find_new_blocks('test')
     
     @override_settings(POOL_ADDRESS={'test': 'POOLADDR'})
     def test_mark_as_processed(self):
-        with mock.patch('purepool.models.block.tasks.BiblePayRpcClient.subsidy') as mock_subsidy:
+        with mock.patch('purepool.models.block.tasks.BiblePayRpcClient.subsidy') as mock_subsidy, \
+             mock.patch('purepool.models.block.tasks.get_block_time', return_value=self.block_time):
             # the mock client will return the result for two block
             mock_subsidy.side_effect = [
                 {'subsidy': 100, 'minerguid': 'unknown', 'recipient': 'POOLADDR'},
@@ -124,7 +148,8 @@ class find_new_blocksTestCase(TestCase):
                     
     @override_settings(POOL_ADDRESS={'test': 'POOLADDR'})
     def test_max_height(self):
-        with mock.patch('purepool.models.block.tasks.BiblePayRpcClient.subsidy') as mock_subsidy:
+        with mock.patch('purepool.models.block.tasks.BiblePayRpcClient.subsidy') as mock_subsidy, \
+             mock.patch('purepool.models.block.tasks.get_block_time', return_value=self.block_time):
             # the mock client will return the result for two block
             mock_subsidy.side_effect = [
                 {'subsidy': 100, 'minerguid': 'unknown', 'recipient': 'POOLADDR'},

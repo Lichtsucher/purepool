@@ -29,8 +29,13 @@ class calculate_multiplyTestCase(TestCase):
         self.miner.percent_ratio = 400
         self.miner.save()
 
+        
         with mock.patch('random.randrange', return_value=200):
-            self.assertEqual(calculate_multiply(self.solution_string), 0)
+            # multiply is inactive right now, it always returns 1
+            #self.assertEqual(calculate_multiply(self.solution_string), 0)
+            self.assertEqual(calculate_multiply(self.solution_string), 1)
+        
+        
 
         with mock.patch('random.randrange', return_value=50):
             self.assertEqual(calculate_multiply(self.solution_string), 1)
@@ -38,15 +43,22 @@ class calculate_multiplyTestCase(TestCase):
     def test_good(self):
         self.miner.percent_ratio = 9
         self.miner.save()
-        self.assertEqual(calculate_multiply(self.solution_string), 4)
+        
+        # multiply is inactive right now, it always returns 1
+        #self.assertEqual(calculate_multiply(self.solution_string), 4)
+        self.assertEqual(calculate_multiply(self.solution_string), 1)
 
         self.miner.percent_ratio = 30
         self.miner.save()
-        self.assertEqual(calculate_multiply(self.solution_string), 3)
+        # multiply is inactive right now, it always returns 1
+        #self.assertEqual(calculate_multiply(self.solution_string), 3)
+        self.assertEqual(calculate_multiply(self.solution_string), 1)
 
         self.miner.percent_ratio = 50
         self.miner.save()
-        self.assertEqual(calculate_multiply(self.solution_string), 2)
+        # multiply is inactive right now, it always returns 1
+        #self.assertEqual(calculate_multiply(self.solution_string), 2)
+        self.assertEqual(calculate_multiply(self.solution_string), 1)
 
 class validate_solutionTestCase(TestCase):
     

@@ -11,6 +11,15 @@ from purepool.models.solution.models import Solution
 from purepool.models.miner.models import Miner
 from puretransaction.models import Transaction
 
+def get_block_time(network, height):    
+    """ returns the UTC datetime when a block was added to the chain """
+    
+    client = BiblePayRpcClient(network=network)
+    
+    block_hash = client.rpc.getblockhash(height)
+    data = client.rpc.getblock(block_hash)
+    return datetime.datetime.utcfromtimestamp(data['time'])
+
 @shared_task()
 def find_new_blocks(network, mark_as_processed=False, max_height=None):
     """ Asks the biblepay client for new blocks and put them into our database.
@@ -83,6 +92,14 @@ def find_new_blocks(network, mark_as_processed=False, max_height=None):
         if pool_block and mark_as_processed:
             process_status = 'FI'
             
+        # we put the inserted_at time as the time the block was registered in the block chain
+        # this is important if there was a delay in finding the blocks, as a wrong inserted_at time
+        # (compared to the found solutions) would create a lot of problems with the shareoud of the solutions,
+        # as multple blocks would have nearly the same inserted_at tiome
+        #
+        # To prevent that, the inserted_at time is the blockchain time
+        found_block_time = get_block_time(network, next_max_height)
+            
         # and finally, we save the block to the database.
         # in the next step, if processed=False and pool_block=True,
         # the task "process_next_block" will take the block and use it
@@ -94,11 +111,14 @@ def find_new_blocks(network, mark_as_processed=False, max_height=None):
             miner=miner,
             subsidy=subsidy_amount,
             recipient=subsidy.get('recipient', ''),
-            
+                        
             # and some statistics
             block_version=subsidy.get('blockversion', ""),
             block_version2=subsidy.get('blockversion2', ""),
         )
+        block.save()
+        
+        block.inserted_at = found_block_time
         block.save()
         
         # next round with a inceased height
