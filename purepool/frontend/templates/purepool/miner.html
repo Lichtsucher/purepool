@@ -48,12 +48,14 @@
           <tbody>
             <tr>
               <th>Errormessage</th>
+              <th>Worker</th>
               <th>Count</th>
             </tr>
             
             {% for error_msg in error_msgs %}
             <tr>
               <td>{{ error_msg.exception_type }}</td>
+              <td>{{ error_msg.work__worker__name }}</td>
               <td>{{ error_msg.total }}</td>
             </tr>
             {% endfor %}

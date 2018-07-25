@@ -104,4 +104,4 @@ def get_basic_statistics(network, days):
 def miner_error_message_statistic(network, miner_id, days=1):
     days_dt = timezone.now() - datetime.timedelta(days=days)
     
-    return RejectedSolution.objects.filter(network=network, miner_id=miner_id, inserted_at__gte=days_dt).exclude(exception_type='').exclude(exception_type='TransactionTampered').values('exception_type').annotate(total=Count('exception_type'))
+    return RejectedSolution.objects.filter(network=network, miner_id=miner_id, inserted_at__gte=days_dt).exclude(exception_type='').exclude(exception_type='TransactionTampered').values('exception_type', 'work__worker__name').annotate(total=Count('id'))
